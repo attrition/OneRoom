@@ -25,10 +25,6 @@ var clearLog = function() {
     logArr = [];
 }
 
-var setDetails = function(msg) {
-    details.innerHTML = msg;
-}
-
 var GameStates = { 
     PLAYERMOVE: 0,
     ANIMATING: 1,
@@ -508,7 +504,7 @@ var initLevel = function(num, customMap) {
     // 0 is for custom levels, so they progress to level 1 after victory
     if (num == 0) {
         lastCustomMap = customMap;
-        
+
         // catch ANYTHING here and go to level 1 if something is messed update
         try {
             levelName =  "user made level";
@@ -531,7 +527,7 @@ var initLevel = function(num, customMap) {
         player = makeMob("player-knight", 2, 3);
         entities.push(makeMob("skeleton", 4, 2));
         entities.push(makeMob("ghoul", 2, 0));
-        levelName = "first blood -- hover over or tap enemies to see attack patterns";
+        levelName = "hover over or tap enemies to see attack patterns";
     } else if (num == 2) {
         player = makeMob("player-knight", 2, 3);
         entities.push(makeMob("skeleton", 4, 2));
@@ -575,7 +571,7 @@ var initLevel = function(num, customMap) {
         entities.push(makeMob("skeleton", 2, 1));
         entities.push(makeMob("skeleton", 0, 2));
         entities.push(makeMob("ghoul", 9, 2));
-        levelName = "oh shi";
+        levelName = "oh, oh no";
     } else if (num == 8) {
         player = makeMob("player-knight", 2, 3);
         entities.push(makeMob("skeleton", 4, 2));
@@ -588,14 +584,14 @@ var initLevel = function(num, customMap) {
         levelName = "i beat this once";
     }
 
+    addLog("welcome to level " + num + " (" + levelName +")");
+
     entities.push(player);
     player.moves = getPlayerMoves();
     gameState = GameStates.PLAYERMOVE;
 
     if (complete) {
-        setDetails("You already defeated every level! Here's Level 1 again");
-    } else {
-        setDetails("Level " + num + ": " + levelName);
+        addLog("you already defeated every level! So here's Level 1 again");
     }
 }
 
@@ -724,7 +720,6 @@ var attack = function(att, def) {
 
 var onDoneAttack = function(att, def) {
     def.hp -= 1;
-    //addLog(att.type + " attacks " + def.type);
 
     if (def.hp <= 0) {
         addLog(att.type + " killed " + def.type + "!");
@@ -739,9 +734,9 @@ var onDoneAttack = function(att, def) {
     }
 
     if (player == null || player.hp <= 0) {
+        addLog("oh no! click to try again");
         gameState = GameStates.GAMEOVER;
-        playSound("defeat.wav");
-        setDetails("Game over! Click to retry");
+        playSound("defeat.wav");                
     }     
 }
 
@@ -754,9 +749,10 @@ var tick = function() {
     }
 
     if (entities.length == 1 && gameState != GameStates.GAMEOVER) {
+        addLog("victory!");
         gameState = GameStates.VICTORY;
         playSound("victory.wav");
-        setDetails("You are victorious! Click to continue to the next level");
+        //setDetails("You are victorious! Click to continue to the next level");
     }
 
     player.moves = getPlayerMoves();
