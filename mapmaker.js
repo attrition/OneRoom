@@ -21,8 +21,8 @@ var updateShareLink = function() {
         return; 
     };
 
-    var link = "?player=" + player.x + "," + player.y;
-    link += "&mobs=";
+    var link = "?p=" + player.x + "," + player.y;
+    link += "&m=";
 
     if (entities.length <= 1) {
         shareBox.innerHTML = "you must add at least 1 enemy to generate the share url";
@@ -33,7 +33,7 @@ var updateShareLink = function() {
         // player is handled differently, for probably unnecessary reasons
         let ent = entities[i];
         if (ent.type != "player-knight") {
-            link += ent.type + "," + ent.x + "," + ent.y + ",";            
+            link += ent.shortName + "," + ent.x + "," + ent.y + ",";            
         }        
     }
     link = link.slice(0, -1);
@@ -73,7 +73,8 @@ var Mob = function(type, x, y) {
     this.img.src = type + ".png";
     this.idleImg = new Image();
     this.idleImg.src = type + "2.png";
-    
+    this.shortName = validBrushShortNames[validBrushTypes.indexOf(this.type)];
+
     var realPos = realPosFromTilePos(x, y);
     this.realPos = { x: realPos.x, y: realPos.y };
 }
@@ -90,6 +91,16 @@ var validBrushTypes = [
     "black-knight"
 ];
 
+var validBrushShortNames = [
+    "pk",
+    "s",
+    "g",
+    "ds",
+    "dm",
+    "ok",
+    "om",
+    "bk"        
+]
 
 var getMousePos = function() {
     var rect = canvas.getBoundingClientRect();

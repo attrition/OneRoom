@@ -124,6 +124,15 @@ var validMobTypes = [
     "black-knight"
 ];
 
+var validMobShortNames = [
+    "s",
+    "g",
+    "ds",
+    "dm",
+    "ok",
+    "om",
+    "bk"        
+]
 var distBetweenTiles = function(a, b) {
     return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2))
 } 
@@ -760,8 +769,8 @@ var getCustomLayout = function(params) {
     // any failure here will and we just go to level 1 instead
     try {
         var mobs = [];
-        var mobParam = params.get('mobs').split(',');
-        var playerParam = params.get('player').split(',');
+        var mobParam = params.get('m').split(',');
+        var playerParam = params.get('p').split(',');
         var px = Number.parseInt(playerParam.shift());
         var py = Number.parseInt(playerParam.shift());
 
@@ -770,7 +779,7 @@ var getCustomLayout = function(params) {
         var sets = mobParam.length / 3;
         
         for (let mob = 0; mob < sets; ++mob)  {
-            let type = mobParam.shift();
+            let type = validMobTypes[validMobShortNames.indexOf(mobParam.shift())];
             let x = Number.parseInt(mobParam.shift());
             let y = Number.parseInt(mobParam.shift());
             mobs.push( { type: type, x: x, y: y } );
@@ -794,8 +803,8 @@ makeLevelSkipButtons();
 let params = new URLSearchParams(location.search.slice(1));
 
 // if we have custom map params try and parse those
-if (params.get('mobs') != null &&
-    params.get('player') != null) {
+if (params.get('m') != null &&
+    params.get('p') != null) {
     let customMap = getCustomLayout(params);
 
     // if customMap failed just go to level 1
