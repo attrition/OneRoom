@@ -39,6 +39,7 @@ var GameStates = {
 var gameState = GameStates.PLAYERMOVE;
 var gameLevel = 1;
 var maxLevels = 8;
+var lastCustomMap = null;
 
 var tileScale = 8
 var tileSize = tileScale * 9;
@@ -506,10 +507,11 @@ var initLevel = function(num, customMap) {
     
     // 0 is for custom levels, so they progress to level 1 after victory
     if (num == 0) {
+        lastCustomMap = customMap;
+        
         // catch ANYTHING here and go to level 1 if something is messed update
         try {
             levelName =  "user made level";
-            console.log(customMap);
             player = makeMob("player-knight", customMap.player.x, customMap.player.y);
 
             for (let mob of customMap.mobs) {
@@ -645,7 +647,12 @@ canvas.addEventListener('mouseup', function(event) {
             }
         }
     } else if (gameState == GameStates.GAMEOVER) {
-        initLevel(gameLevel);
+        // in case player just lost on a custom map, reset it
+        if (gameLevel == 0) {
+            initLevel(gameLevel, lastCustomMap);
+        } else {
+            initLevel(gameLevel);
+        } 
     } else if (gameState == GameStates.VICTORY) {
         gameLevel++;
         initLevel(gameLevel);
@@ -800,7 +807,8 @@ var getCustomLayout = function(params) {
             player: { x: px, y: py },
             mobs: mobs,
         }
-
+        
+        // store this so if player dies we can re-init to it 
         return layout;
     } catch (e) {
         return false;
@@ -827,4 +835,6 @@ if (params.get('m') != null &&
 } else {
     initLevel(1);
 }
+
+// start it up
 requestAnimationFrame(gameLoop);
