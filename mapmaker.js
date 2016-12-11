@@ -88,7 +88,8 @@ var validBrushTypes = [
     "demon-mage",
     "orc-knight",
     "orc-mage",
-    "black-knight"
+    "black-knight",
+    "ERASE"
 ];
 
 var validMobShortNames = [
@@ -134,8 +135,13 @@ canvas.addEventListener('mouseup', function(event) {
 
     removeEntityAt(mousePos.x, mousePos.y);
 
-    // if brush is player-knight remove any old entity info so there's only one player
+    // if brush is eraser, update the share link and leave
+    if (mobBrush == "ERASE") {
+        updateShareLink();
+        return;
+    }
 
+    // if brush is player-knight remove any old entity info so there's only one player
     if (mobBrush == "player-knight") {
         if (player != null) {
             removeEntityAt(player.x, player.y);
@@ -150,19 +156,24 @@ canvas.addEventListener('mouseup', function(event) {
 
 var generateBrushButtons = function() {
     var brushList = document.getElementById('brushes');
+    var count = 0;
 
-    for (let type of validBrushTypes) {        
+    for (let type of validBrushTypes) {
         let btn = document.createElement("button");
         let text = document.createTextNode(type);
         
         btn.addEventListener("click", function() {
             var sel = document.getElementById("selected-brush");
             sel.innerHTML = "selected brush: " + type;
-            mobBrush = type; 
+            mobBrush = type;
         });
 
         btn.appendChild(text);
         brushList.appendChild(btn);
+        count++;
+        if (count % 5 == 0) {
+            brushList.appendChild(document.createElement("br"));
+        }
     }
 }
 
