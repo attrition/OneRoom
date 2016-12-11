@@ -113,7 +113,7 @@ var Mob = function(type, hp, x, y) {
     this.animateAttack = {};
 }
 
-// all support enemy types
+// all supported enemy types
 var validMobTypes = [
     "skeleton",
     "ghoul",
@@ -599,41 +599,38 @@ var getMousePos = function() {
     };
 }
 
-canvas.addEventListener('mousemove', 
-    function(event) {        
-        // check if we're hovering over a mob, set his attack highlights
+canvas.addEventListener('mousemove', function(event) { 
+    // check if we're hovering over a mob, set his attack highlights
+    mousePos = getMousePos();
+    highlighting = [];
+    for (let ent of entities) {
+        if (ent.x == mousePos.x && ent.y == mousePos.y) {
+            for (let hl of ent.attackTiles) {
+                highlighting.push({x: hl.x, y: hl.y, colour: highlights.WARN});
+            }
+            break;
+        }
+    }
+}, false);
+
+canvas.addEventListener('mouseup', function(event) {     
+    // if playermove validate move then tick
+    var moved = false;            
+
+    if (gameState == GameStates.PLAYERMOVE) {
         mousePos = getMousePos();
-        highlighting = [];
-        for (let ent of entities) {
-            if (ent.x == mousePos.x && ent.y == mousePos.y) {
-                for (let hl of ent.attackTiles) {
-                    highlighting.push({x: hl.x, y: hl.y, colour: highlights.WARN});
-                }
-                break;
+        for (let move of player.moves) {
+            if (mousePos.x == move.x && mousePos.y == move.y) {
+                move.action();
             }
         }
-
-    }, false);
-
-canvas.addEventListener('mouseup', 
-    function(event) {
-        // if playermove validate move then tick
-        var moved = false;            
-
-        if (gameState == GameStates.PLAYERMOVE) {
-            mousePos = getMousePos();
-            for (let move of player.moves) {
-                if (mousePos.x == move.x && mousePos.y == move.y) {
-                    move.action();
-                }
-            }
-        } else if (gameState == GameStates.GAMEOVER) {
-            initLevel(gameLevel);
-        } else if (gameState == GameStates.VICTORY) {
-            gameLevel++;
-            initLevel(gameLevel);
-        }
-    }, false);
+    } else if (gameState == GameStates.GAMEOVER) {
+        initLevel(gameLevel);
+    } else if (gameState == GameStates.VICTORY) {
+        gameLevel++;
+        initLevel(gameLevel);
+    }
+}, false);
 
 // rendering
 
