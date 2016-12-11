@@ -113,6 +113,17 @@ var Mob = function(type, hp, x, y) {
     this.animateAttack = {};
 }
 
+// all support enemy types
+var validMobTypes = [
+    "skeleton",
+    "ghoul",
+    "demon-spear",
+    "demon-mage",
+    "orc-knight",
+    "orc-mage",
+    "black-knight"
+];
+
 var distBetweenTiles = function(a, b) {
     return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2))
 } 
@@ -430,12 +441,12 @@ var makeMob = function(type, x, y) {
 
 var getPlayerMoves = function() {
     var moves = [];
+    console.log(player);
     for (let y = player.y - 1; y <= player.y + 1; ++y) {
         for (let x = player.x - 1; x <= player.x + 1; ++x) {
-
+            
             // skip own tile            
             if (!(x == player.x && y == player.y)) {
-                //var actionFn = getMoveFn(player, x, y);
                 let actionFn = function() { move(player, x, y) };
 
                 let colour = highlights.MOVE;
@@ -458,9 +469,10 @@ var getPlayerMoves = function() {
 var entities = [];
 var player = {};
 
-var initLevel = function(num) {   
+var initLevel = function(num, customMap) {
     entities = [];
     particles = [];
+    player.moves = [];
     clearLog();
     gameLevel = num;
 
@@ -471,17 +483,35 @@ var initLevel = function(num) {
     }
 
     var levelName = "";
+    
+    // 0 is for custom levels, so they progress to level 1 after victory
+    if (num == 0) {
+        // catch ANYTHING here and go to level 1 if something is messed update
+        try {
+            levelName =  "user made level";
+            console.log(customMap);
+            player = makeMob("player-knight", customMap.player.x, customMap.player.y);
 
-    player = makeMob("player-knight", 2, 3);
-    player.moves = [];
-    entities.push(player);
-
+            for (let mob of customMap.mobs) {
+                if (validMobTypes.indexOf(mob.type) != -1) {
+                    if (inBounds(mob.x, mob.y)) {
+                        entities.push(makeMob(mob.type, mob.x, mob.y));
+                    }
+                }
+            }
+        } catch (e) {
+            initLevel(1);
+        }
+    } 
+    
     if (num == 1) {   
+        // in standard level set the player always starts in the same spot
+        player = makeMob("player-knight", 2, 3);
         entities.push(makeMob("skeleton", 4, 2));
         entities.push(makeMob("ghoul", 2, 0));
         levelName = "first blood -- try hovering over or tapping on an enemy to see their attack pattern";
     } else if (num == 2) {
-
+        player = makeMob("player-knight", 2, 3);
         entities.push(makeMob("skeleton", 4, 2));
         entities.push(makeMob("ghoul", 2, 0));
         entities.push(makeMob("ghoul", 0, 6));
@@ -489,17 +519,20 @@ var initLevel = function(num) {
         entities.push(makeMob("demon-mage", 9, 5));
         levelName = "pick on someone your own size"
     } else if (num == 3) {
+        player = makeMob("player-knight", 2, 3);
         entities.push(makeMob("orc-knight", 7, 5));
         entities.push(makeMob("orc-knight", 5, 3));
         entities.push(makeMob("orc-mage", 11, 0));
         entities.push(makeMob("orc-mage", 9, 4));
         levelName = "now we're cooking";        
     } else if (num == 4) {
+        player = makeMob("player-knight", 2, 3);
         entities.push(makeMob("demon-mage", 5, 2));
         entities.push(makeMob("demon-mage", 5, 4));
         entities.push(makeMob("black-knight", 7, 3));
         levelName = "pick your battles";
     } else if (num == 5) {
+        player = makeMob("player-knight", 2, 3);
         entities.push(makeMob("orc-knight", 0, 2));
         entities.push(makeMob("orc-knight", 4, 5));
         entities.push(makeMob("orc-mage", 5, 0));
@@ -507,11 +540,13 @@ var initLevel = function(num) {
         entities.push(makeMob("demon-spear", 8, 6));
         levelName = "play time for the baddies";
     } else if (num == 6) {
+        player = makeMob("player-knight", 2, 3);
         entities.push(makeMob("black-knight", 0, 1));
         entities.push(makeMob("black-knight", 6, 6));
         entities.push(makeMob("demon-mage", 0, 4));
         levelName = "sup";
     } else if (num == 7) {
+        player = makeMob("player-knight", 2, 3);
         entities.push(makeMob("black-knight", 13, 6));
         entities.push(makeMob("black-knight", 9, 4));
         entities.push(makeMob("demon-mage", 5, 4));
@@ -520,6 +555,7 @@ var initLevel = function(num) {
         entities.push(makeMob("ghoul", 9, 2));
         levelName = "oh shi";
     } else if (num == 8) {
+        player = makeMob("player-knight", 2, 3);
         entities.push(makeMob("skeleton", 4, 2));
         entities.push(makeMob("ghoul", 2, 0));
         entities.push(makeMob("demon-spear", 6, 6));
@@ -530,6 +566,7 @@ var initLevel = function(num) {
         levelName = "i beat this once";
     }
 
+    entities.push(player);
     player.moves = getPlayerMoves();
     gameState = GameStates.PLAYERMOVE;
 
@@ -719,9 +756,58 @@ var makeLevelSkipButtons = function() {
     }
 }
 
+//// custom level parsing
+
+var getCustomLayout = function(params) {
+    
+    // any failure here will and we just go to level 1 instead
+    try {
+        var mobs = [];
+        var mobParam = params.get('mobs').split(',');
+        var playerParam = params.get('player').split(',');
+        var px = Number.parseInt(playerParam.shift());
+        var py = Number.parseInt(playerParam.shift());
+
+        // check #1, we expect type-name,x,y, so sets of 3 inputs
+        if (mobParam.length % 3 != 0) { return false; }
+        var sets = mobParam.length / 3;
+        
+        for (let mob = 0; mob < sets; ++mob)  {
+            let type = mobParam.shift();
+            let x = Number.parseInt(mobParam.shift());
+            let y = Number.parseInt(mobParam.shift());
+            mobs.push( { type: type, x: x, y: y } );
+        }
+
+        var layout = {
+            player: { x: px, y: py },
+            mobs: mobs,
+        }
+
+        return layout;
+    } catch (e) {
+        return false;
+    }
+}
+
 //// game entry point
 
 makeLevelSkipButtons();
 
-initLevel(1); // will be done via level selection buttons
+let params = new URLSearchParams(location.search.slice(1));
+
+// if we have custom map params try and parse those
+if (params.get('mobs') != null &&
+    params.get('player') != null) {
+    let customMap = getCustomLayout(params);
+
+    // if customMap failed just go to level 1
+    if (customMap != false) {
+        initLevel(0, customMap);
+    } else {
+        initLevel(1);
+    }
+} else {
+    initLevel(1);
+}
 requestAnimationFrame(gameLoop);
