@@ -10,24 +10,27 @@
 
         <h1>Hoplitelite map maker</h1>
         
-        <div>
-            <p id="selected-brush">
-                selected brush: player-knight
-            </p>
-        </div>
-        <div id="brushes"></div>
+        <div id="main">
+            <div>
+                <p id="selected-brush">
+                    selected brush: player-knight
+                </p>
+            </div>
+            <div id="brushes"></div>
 
-        <canvas id="canvas" width="1016" height="512"></canvas>
-        <div id="share">
-            <p>
-                copy and paste this to share your custom map <br />
-            </p>
-            <textarea id="shareBox" onfocus="this.select()" cols="50" rows="5"></textarea>
-            <div id="testMap"></div>
-            <p>
-                not interested? <a href="index.html">take me back to the game</a>
-            </p>
+            <canvas id="canvas" width="1016" height="512"></canvas>
+            <div id="share">
+                <p id="testMap"></p>
+                <p>
+                    copy and paste below to share your custom map <br />
+                </p>
+                <textarea id="shareBox" onfocus="this.select()" cols="50" rows="5"></textarea>
+                <p>
+                    not interested? <a href="index.html">take me back to the game</a>
+                </p>
+            </div>
         </div>
+        
         <script src="mapmaker.js"></script>
     </body>
 

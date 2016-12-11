@@ -36,6 +36,10 @@ button {
     cursor: pointer;
 }
 
+div#main {
+    text-align: center;
+}
+
 p#log {
     background-color: darkslategrey;
     color: white;
@@ -43,8 +47,10 @@ p#log {
     font-style: normal;
     font-weight: normal;
     font-size: 12px;
-    line-height: 18px;
+    line-height: 20px;
     padding: 8px 12px;
+    width: 992px;
+    margin: 10px auto;
 }
 
 p#mapMaker {
