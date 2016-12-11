@@ -57,7 +57,7 @@ backgroundImg.src = "arena-7x14.png";
 
 // particles use real positions at all times
 var Particle = function(type, x, y) {
-    this.type = this;
+    this.type = type;
     this.img = new Image();
     this.img.src = type + ".png";
     this.x = x;
@@ -70,6 +70,29 @@ var destroyParticle = function(particle) {
     if (idx != -1) {
         particles.splice(idx, 1);
     }
+}
+
+var playSound = function(file, quiet) {
+    var effect = new Audio(file);
+    if (quiet) {
+        effect.volume = 0.2;
+    } else {
+        effect.volume = 0.3;
+    }
+    
+    effect.play();
+}
+
+var playRandomMoveSound = function() {
+    var moveSounds = 3;
+    
+    // min <= num < max    
+    max = Math.floor(moveSounds);
+    var num = Math.floor(Math.random() * ((max + 1) - 1)) + 1;
+    console.log("move"+num);
+
+    // make moves quieter
+    playSound("move" + num + ".wav", true);
 }
 
 // Mobs use tile positions for x/y generally and realPos for drawing
@@ -112,7 +135,7 @@ var AIBasic = function(self, flees) {
     // for each possible attack, check if it's possible to hit
     // if not then find the closest attack tile near the player
     // in the hopes that we can move the attack tiles closer
-    for (var tile of self.attackTiles) {
+    for (let tile of self.attackTiles) {
         
         // if attacking we can bail on the rest of this function
         if (tile.x == player.x && tile.y == player.y) {
@@ -121,7 +144,7 @@ var AIBasic = function(self, flees) {
         }
 
         // not attacking (yet) keep finding the closest attack tile
-        var dist = distBetweenTiles(tile, player);
+        let dist = distBetweenTiles(tile, player);
         if (dist < closestDist) {
             closestDist = dist;
             closestTile = tile;
@@ -136,18 +159,18 @@ var AIBasic = function(self, flees) {
     // even if it gets us killed
 
     var moves = [];
-    for (var y = self.y - 1; y <= self.y + 1; ++y) {
-        for (var x = self.x - 1; x <= self.x + 1; ++x) {
+    for (let y = self.y - 1; y <= self.y + 1; ++y) {
+        for (let x = self.x - 1; x <= self.x + 1; ++x) {
             
             // move only within the arena and on x/y axes
-            if ((x != self.x || y != self.y) && !inBounds(x, y)) {
+            if (!inBounds(x, y) || (x != self.x && y != self.y)) {
                 continue;
             }
 
             // check no other entity is in this spot
             // includes self so no need to check for that separately
-            var blocked = false;
-            for (var ent of entities) {
+            let blocked = false;
+            for (let ent of entities) {
                 if (ent.x == x && ent.y == y) {
                     blocked = true;                    
                 }
@@ -178,6 +201,9 @@ var animMeleeAttack = function(self, target) {
 var tweenMeleeAttack = function(self, target) {    
     return new TWEEN.Tween(self.realPos)
         .to({ x: target.realPos.x, y: target.realPos.y }, 50)
+        .onStart(function() {
+            playSound("melee-hit.wav");
+        })
         .onComplete(function() {
             onDoneAttack(self, target);
             nextAnimation();
@@ -185,17 +211,20 @@ var tweenMeleeAttack = function(self, target) {
 }
 
 var animMageAttack = function(self, target, particleType) {
-    var particle = new Particle(particleType, self.realPos.x, self.realPos.y);
-    particles.push(particle);
-    queueAnimation(tweenMageAttack(self, target, particle));
+    queueAnimation(tweenMageAttack(self, target, particleType));
 }
 
-var tweenMageAttack = function(self, target, particle) {
-    console.log(self, target, particle);
+var tweenMageAttack = function(self, target, particleType) {
+    let particle = new Particle(particleType, self.realPos.x, self.realPos.y);
     return new TWEEN.Tween(particle)
         .to({ x: target.realPos.x, y: target.realPos.y }, 333)
+        .onStart(function() {            
+            particles.push(particle);
+            playSound(particle.type + "-shoot.wav");
+        })
         .onComplete(function() {
             destroyParticle(particle);
+            playSound(particle.type + "-hit.wav");
             onDoneAttack(self, target);
             nextAnimation();
         });
@@ -210,6 +239,9 @@ var animatedMove = function(self, target) {
 var tweenEntToTile = function(self, target) {
     return new TWEEN.Tween(self.realPos)
         .to(realPosFromTilePos(target.x, target.y), 150)
+        .onStart(function() {
+            playRandomMoveSound();
+        })
         .onComplete(function() {
             nextAnimation();
 
@@ -230,7 +262,7 @@ var nextAnimation = function() {
 
     if (animationQueue.length > 0) {
         gameState = GameStates.ANIMATING;
-        var anim = animationQueue.pop();
+        let anim = animationQueue.pop();
         anim.start();
     } else {
         // if game state was switched to something other than animating
@@ -394,28 +426,21 @@ var makeMob = function(type, x, y) {
     return mob;
 }
 
-var getMoveFn = function(ent, x, y) {
-    return function() { move(ent, x, y )};
-}
-
-var getAttackFn = function(att, def) {
-    return function() { attack(att, def) };
-}
-
 var getPlayerMoves = function() {
     var moves = [];
-    for (var y = player.y - 1; y <= player.y + 1; ++y) {
-        for (var x = player.x - 1; x <= player.x + 1; ++x) {
+    for (let y = player.y - 1; y <= player.y + 1; ++y) {
+        for (let x = player.x - 1; x <= player.x + 1; ++x) {
 
             // skip own tile            
             if (!(x == player.x && y == player.y)) {
-                var actionFn = getMoveFn(player, x, y);
+                //var actionFn = getMoveFn(player, x, y);
+                let actionFn = function() { move(player, x, y) };
 
-                var colour = highlights.MOVE;
+                let colour = highlights.MOVE;
 
-                for (var ent of entities) {
+                for (let ent of entities) {
                     if (ent.x == x && ent.y == y) {
-                        actionFn = getAttackFn(player, ent);
+                        actionFn = function() { attack(player, ent) };
                         colour = highlights.ATTACK;
                         break;
                     }
@@ -435,7 +460,8 @@ var initLevel = function(num) {
     entities = [];
     particles = [];
     clearLog();
-    
+    gameLevel = num;
+
     var complete = false;
     if (num > maxLevels) {
         num = 1;
@@ -509,9 +535,9 @@ canvas.addEventListener('mousemove',
         // check if we're hovering over a mob, set his attack highlights
         mousePos = getMousePos();
         highlighting = [];
-        for (var ent of entities) {
+        for (let ent of entities) {
             if (ent.x == mousePos.x && ent.y == mousePos.y) {
-                for (var hl of ent.attackTiles) {
+                for (let hl of ent.attackTiles) {
                     highlighting.push({x: hl.x, y: hl.y, colour: highlights.WARN});
                 }
                 break;
@@ -527,7 +553,7 @@ canvas.addEventListener('mouseup',
 
         if (gameState == GameStates.PLAYERMOVE) {
             mousePos = getMousePos();
-            for (var move of player.moves) {
+            for (let move of player.moves) {
                 if (mousePos.x == move.x && mousePos.y == move.y) {
                     move.action();
                 }
@@ -611,12 +637,13 @@ var onDoneAttack = function(att, def) {
             move(att, def.x, def.y);
         }
 
-        var idx = entities.indexOf(def);
+        let idx = entities.indexOf(def);
         entities.splice(idx, 1);
     }
 
     if (player == null || player.hp <= 0) {
         gameState = GameStates.GAMEOVER;
+        playSound("defeat.wav");
         setDetails("Game over! Click to retry");
     }     
 }
@@ -624,13 +651,14 @@ var onDoneAttack = function(att, def) {
 var tick = function() {
     console.log("tick");
 
-    for (var ent of entities) {
+    for (let ent of entities) {
         ent.AIMove();
         ent.attackTiles = getAttackTiles(ent);                      
     }
 
     if (entities.length == 1 && gameState != GameStates.GAMEOVER) {
         gameState = GameStates.VICTORY;
+        playSound("victory.wav");
         setDetails("You are victorious! Click to continue to the next level");
     }
 
@@ -643,16 +671,12 @@ var gameLoop = function(time) {
     requestAnimationFrame(gameLoop);
 }
 
-var skipToLevel = function(lvl) {
-    initLevel(lvl);
-}
-
 var makeLevelSkipButtons = function() {
     var skipList = document.getElementById('skipButtons');
     
     for (let lvl = 1; lvl <= maxLevels; lvl++) {
-        var btn = document.createElement("button");
-        var text = document.createTextNode("Level " + lvl);
+        let btn = document.createElement("button");
+        let text = document.createTextNode("Level " + lvl);
         btn.addEventListener("click", function() { initLevel(lvl) });
         btn.appendChild(text);
         skipList.appendChild(btn);
@@ -663,5 +687,5 @@ var makeLevelSkipButtons = function() {
 
 makeLevelSkipButtons();
 
-initLevel(gameLevel); // will be done via level selection buttons
+initLevel(1); // will be done via level selection buttons
 requestAnimationFrame(gameLoop);
