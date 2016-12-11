@@ -13,6 +13,15 @@ var tileOffset = tileScale / 2;
 var backgroundImg = new Image();
 backgroundImg.src = "arena-7x14.png";
 
+var gapImg = new Image();
+gapImg.src = "gap.png";
+
+var Gap = function(x, y) {
+    this.x = x;
+    this.y = y;
+}
+gaps = [];
+
 var updateShareLink = function() {
     var baseLink = "http://astudyinpixels.com/ld37/index.html";
 
@@ -29,6 +38,7 @@ var updateShareLink = function() {
         return;
     }
 
+    // add entities to url
     for (let i = 0; i < entities.length; ++i) {
         // player is handled differently, for probably unnecessary reasons
         let ent = entities[i];
@@ -37,6 +47,16 @@ var updateShareLink = function() {
         }        
     }
     link = link.slice(0, -1);
+
+    // add gaps to url
+    if (gaps.length > 0) {
+        link += "&g=";
+        for (let gap of gaps) {
+            link += gap.x + "," + gap.y + ",";
+        }
+    }
+    link = link.slice(0, -1);
+
     
     var finalLink = baseLink + link;
     shareBox.innerHTML = finalLink;
@@ -89,7 +109,8 @@ var validBrushTypes = [
     "orc-knight",
     "orc-mage",
     "black-knight",
-    "ERASE"
+    "TILE-GAP",
+    "ERASE"    
 ];
 
 var validMobShortNames = [
@@ -112,18 +133,29 @@ var getMousePos = function() {
     };
 }
 
-var removeEntityAt = function(x, y) {
+var removeEntityOrGapAt = function(x, y) {
     // if entity exists in this spot, replace it
-    var idx = -1;    
+    var entIdx = -1;    
     for (var i = 0; i < entities.length; ++i) {
         if (entities[i].x == x && entities[i].y == y) {
-            idx = i;
+            entIdx = i;
             break;
         }
     }
 
-    if (idx != -1) {
-        entities.splice(idx, 1);
+    var gapIdx = -1;
+    for (var k = 0; k < gaps.length; ++k) {
+        if (gaps[k].x == x && gaps[k].y == y) {
+            gapIdx = k;
+            break;
+        }
+    }
+
+    if (entIdx != -1) {
+        entities.splice(entIdx, 1);
+    }
+    if (gapIdx != -1) {
+        gaps.splice(gapIdx, 1);
     }
 }
 
@@ -133,7 +165,7 @@ canvas.addEventListener('mouseup', function(event) {
     // is this even possible?
     if (!inBounds(mousePos.x, mousePos.y)) { return; }
 
-    removeEntityAt(mousePos.x, mousePos.y);
+    removeEntityOrGapAt(mousePos.x, mousePos.y);
 
     // if brush is eraser, update the share link and leave
     if (mobBrush == "ERASE") {
@@ -141,10 +173,16 @@ canvas.addEventListener('mouseup', function(event) {
         return;
     }
 
+    if (mobBrush == "TILE-GAP") {
+        gaps.push(new Gap(mousePos.x, mousePos.y));
+        updateShareLink();
+        return;
+    }
+
     // if brush is player-knight remove any old entity info so there's only one player
     if (mobBrush == "player-knight") {
         if (player != null) {
-            removeEntityAt(player.x, player.y);
+            removeEntityOrGapAt(player.x, player.y);
         }
         player = { x: mousePos.x, y: mousePos.y };
     }
@@ -188,9 +226,17 @@ var drawEntities = function(time) {
     }
 }
 
+var drawGaps = function() {
+    for (var gap of gaps) {
+        let realPos = realPosFromTilePos(gap.x, gap.y)
+        ctx.drawImage(gapImg, realPos.x, realPos.y);
+    }
+}
+
 var drawLoop = function(time) {
     ctx.drawImage(backgroundImg, 0, 0);
 
+    drawGaps();
     drawEntities(time);
     
     requestAnimationFrame(drawLoop);

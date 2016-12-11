@@ -63,6 +63,15 @@ var mousePos = { x: 0, y: 0 };
 var backgroundImg = new Image();
 backgroundImg.src = "arena-7x14.png";
 
+var gapImg = new Image();
+gapImg.src = "gap.png";
+
+var Gap = function(x, y) {
+    this.x = x;
+    this.y = y;
+}
+gaps = [];
+
 // particles use real positions at all times
 var Particle = function(type, x, y) {
     this.type = type;
@@ -203,6 +212,13 @@ var AIBasic = function(self, flees) {
             for (let ent of entities) {
                 if (ent.x == x && ent.y == y) {
                     blocked = true;                    
+                }
+            }
+            
+            // gaps also block movement 
+            for (let gap of gaps) {
+                if (gap.x == x && gap.y == y) {
+                    blocked = true;
                 }
             }
 
@@ -464,19 +480,30 @@ var getPlayerMoves = function() {
             
             // skip own tile            
             if (!(x == player.x && y == player.y)) {
+                
                 let actionFn = function() { move(player, x, y) };
-
                 let colour = highlights.MOVE;
 
-                for (let ent of entities) {
-                    if (ent.x == x && ent.y == y) {
-                        actionFn = function() { attack(player, ent) };
-                        colour = highlights.ATTACK;
+                // don't add gaps to moveset
+                let validTile = true;
+                for (let gap of gaps) {
+                    if (gap.x == x && gap.y == y) {
+                        validTile = false;
                         break;
                     }
                 }
-                
-                moves.push({ x: x, y: y, action: actionFn, colour: colour });
+
+                if (validTile) {
+                    for (let ent of entities) {
+                        if (ent.x == x && ent.y == y) {
+                            actionFn = function() { attack(player, ent) };
+                            colour = highlights.ATTACK;
+                            break;
+                        }
+                    }
+                    
+                    moves.push({ x: x, y: y, action: actionFn, colour: colour });
+                }
             }
         }
     }
@@ -490,6 +517,8 @@ var initLevel = function(num, customMap) {
     entities = [];
     particles = [];
     player.moves = [];
+    gaps = [];
+    
     clearLog();
     gameLevel = num;
 
@@ -507,9 +536,11 @@ var initLevel = function(num, customMap) {
 
         // catch ANYTHING here and go to level 1 if something is messed update
         try {
+            console.log(customMap);
             levelName =  "user made level";
             player = makeMob("player-knight", customMap.player.x, customMap.player.y);
 
+            // mobs
             for (let mob of customMap.mobs) {
                 if (validMobTypes.indexOf(mob.type) != -1) {
                     if (inBounds(mob.x, mob.y)) {
@@ -517,6 +548,13 @@ var initLevel = function(num, customMap) {
                     }
                 }
             }
+
+            // tile gaps
+            for (let gap of customMap.gaps) {                
+                if (inBounds(gap.x, gap.y)) {
+                    gaps.push(new Gap(gap.x, gap.y));
+                }
+            }            
         } catch (e) {
             initLevel(1);
         }
@@ -541,7 +579,10 @@ var initLevel = function(num, customMap) {
         entities.push(makeMob("orc-knight", 7, 5));
         entities.push(makeMob("orc-knight", 5, 3));
         entities.push(makeMob("orc-mage", 11, 0));
-        entities.push(makeMob("orc-mage", 9, 4));
+        entities.push(makeMob("orc-mage", 9, 4));        
+        gaps.push(new Gap(4, 2));
+        gaps.push(new Gap(4, 3));
+        gaps.push(new Gap(4, 4));
         levelName = "now we're cooking";        
     } else if (num == 4) {
         player = makeMob("player-knight", 2, 3);
@@ -562,6 +603,12 @@ var initLevel = function(num, customMap) {
         entities.push(makeMob("black-knight", 0, 1));
         entities.push(makeMob("black-knight", 6, 6));
         entities.push(makeMob("demon-mage", 0, 4));
+        gaps.push(new Gap(5, 3));
+        gaps.push(new Gap(6, 3));
+        gaps.push(new Gap(7, 3));
+        gaps.push(new Gap(6, 1));
+        gaps.push(new Gap(6, 2));
+        gaps.push(new Gap(6, 4));
         levelName = "sup";
     } else if (num == 7) {
         player = makeMob("player-knight", 2, 3);
@@ -697,15 +744,24 @@ var drawParticles = function() {
     }
 }
 
+var drawGaps = function() {
+    for (var gap of gaps) {
+        let realPos = realPosFromTilePos(gap.x, gap.y)
+        ctx.drawImage(gapImg, realPos.x, realPos.y);
+    }
+}
+
 var drawGame = function(time) {
     ctx.drawImage(backgroundImg, 0, 0);
+
+    drawGaps();
 
     if (gameState == GameStates.PLAYERMOVE) {
         drawHighlights();
     }
     
     drawEntities(time);
-    drawParticles();    
+    drawParticles();
 }
 
 // game logic
@@ -752,7 +808,6 @@ var tick = function() {
         addLog("victory!");
         gameState = GameStates.VICTORY;
         playSound("victory.wav");
-        //setDetails("You are victorious! Click to continue to the next level");
     }
 
     player.moves = getPlayerMoves();
@@ -783,27 +838,46 @@ var getCustomLayout = function(params) {
     // any failure here will and we just go to level 1 instead
     try {
         var mobs = [];
+        var customGaps = [];
         var mobParam = params.get('m').split(',');
         var playerParam = params.get('p').split(',');
+        var gapsParam = params.get('g');
+
         var px = Number.parseInt(playerParam.shift());
         var py = Number.parseInt(playerParam.shift());
 
         // check #1, we expect type-name,x,y, so sets of 3 inputs
         if (mobParam.length % 3 != 0) { return false; }
-        var sets = mobParam.length / 3;
+        let mobSets = mobParam.length / 3;
         
-        for (let mob = 0; mob < sets; ++mob)  {
+        for (let mob = 0; mob < mobSets; ++mob)  {
             let type = validMobTypes[validMobShortNames.indexOf(mobParam.shift())];
             let x = Number.parseInt(mobParam.shift());
             let y = Number.parseInt(mobParam.shift());
             mobs.push( { type: type, x: x, y: y } );
         }
 
+        // gaps are optional
+        if (gapsParam != null) {
+            gapSplit = gapsParam.split(',');
+            
+            // bail if gaps don't have x/y pairing
+            if (gapSplit.length % 2 != 0) { return false; }
+            let gapSets = gapSplit.length / 2;
+
+            for (let gap = 0; gap < gapSets; ++gap) {
+                let x = Number.parseInt(gapSplit.shift());
+                let y = Number.parseInt(gapSplit.shift());
+                customGaps.push({ x: x, y: y });
+            }
+        }
+
         var layout = {
             player: { x: px, y: py },
+            gaps: customGaps,
             mobs: mobs,
         }
-        
+        console.log(layout);
         // store this so if player dies we can re-init to it 
         return layout;
     } catch (e) {
@@ -815,12 +889,12 @@ var getCustomLayout = function(params) {
 
 makeLevelSkipButtons();
 
-let params = new URLSearchParams(location.search.slice(1));
+let mapParams = new URLSearchParams(location.search.slice(1));
 
 // if we have custom map params try and parse those
-if (params.get('m') != null &&
-    params.get('p') != null) {
-    let customMap = getCustomLayout(params);
+if (mapParams.get('m') != null &&
+    mapParams.get('p') != null) {
+    let customMap = getCustomLayout(mapParams);
 
     // if customMap failed just go to level 1
     if (customMap != false) {
