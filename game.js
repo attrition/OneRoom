@@ -89,7 +89,6 @@ var playRandomMoveSound = function() {
     // min <= num < max    
     max = Math.floor(moveSounds);
     var num = Math.floor(Math.random() * ((max + 1) - 1)) + 1;
-    console.log("move"+num);
 
     // make moves quieter
     playSound("move" + num + ".wav", true);
@@ -103,6 +102,9 @@ var Mob = function(type, hp, x, y) {
     this.hp = hp;
     this.img = new Image();
     this.img.src = type + ".png";
+    this.idleImg = new Image();
+    this.idleImg.src = type + "2.png";
+    
     var realPos = realPosFromTilePos(x, y);
     this.realPos = { x: realPos.x, y: realPos.y };
 
@@ -217,7 +219,7 @@ var animMageAttack = function(self, target, particleType) {
 var tweenMageAttack = function(self, target, particleType) {
     let particle = new Particle(particleType, self.realPos.x, self.realPos.y);
     return new TWEEN.Tween(particle)
-        .to({ x: target.realPos.x, y: target.realPos.y }, 333)
+        .to({ x: target.realPos.x, y: target.realPos.y }, 366)
         .onStart(function() {            
             particles.push(particle);
             playSound(particle.type + "-shoot.wav");
@@ -592,9 +594,13 @@ var drawHighlights = function() {
     highlightMobAttackTiles();
 }
 
-var drawEntities = function() {
+var drawEntities = function(time) {
     for (var ent of entities) {
-        ctx.drawImage(ent.img, ent.realPos.x, ent.realPos.y); 
+        if (time % 1000 < 500) {
+            ctx.drawImage(ent.img, ent.realPos.x, ent.realPos.y);
+        } else {
+            ctx.drawImage(ent.idleImg, ent.realPos.x, ent.realPos.y);
+        }
     }
 }
 
@@ -604,14 +610,14 @@ var drawParticles = function() {
     }
 }
 
-var drawGame = function(delta) {
+var drawGame = function(time) {
     ctx.drawImage(backgroundImg, 0, 0);
 
     if (gameState == GameStates.PLAYERMOVE) {
         drawHighlights();
     }
     
-    drawEntities();
+    drawEntities(time);
     drawParticles();    
 }
 
@@ -665,7 +671,7 @@ var tick = function() {
     player.moves = getPlayerMoves();
 }
 
-var gameLoop = function(time) {    
+var gameLoop = function(time) {
     TWEEN.update(time);
 	drawGame(time);
     requestAnimationFrame(gameLoop);
