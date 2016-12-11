@@ -27,7 +27,7 @@ var GameStates = {
 
 var gameState = GameStates.PLAYERMOVE;
 var gameLevel = 1;
-var maxLevels = 4;
+var maxLevels = 8;
 
 var tileScale = 8
 var tileSize = tileScale * 9;
@@ -479,17 +479,47 @@ var initLevel = function(num) {
     if (num == 1) {   
         entities.push(makeMob("skeleton", 4, 2));
         entities.push(makeMob("ghoul", 2, 0));
-        levelName = "first blood";
+        levelName = "first blood -- try hovering over or tapping on an enemy to see their attack pattern";
     } else if (num == 2) {
+
+        entities.push(makeMob("skeleton", 4, 2));
+        entities.push(makeMob("ghoul", 2, 0));
+        entities.push(makeMob("ghoul", 0, 6));
         entities.push(makeMob("demon-spear", 6, 6));
         entities.push(makeMob("demon-mage", 9, 5));
         levelName = "pick on someone your own size"
     } else if (num == 3) {
-        entities.push(makeMob("orc-knight", 7, 3));
-        entities.push(makeMob("orc-mage", 11, 1));
-        entities.push(makeMob("black-knight", 13, 4));
+        entities.push(makeMob("orc-knight", 7, 5));
+        entities.push(makeMob("orc-knight", 5, 3));
+        entities.push(makeMob("orc-mage", 11, 0));
+        entities.push(makeMob("orc-mage", 9, 4));
         levelName = "now we're cooking";        
     } else if (num == 4) {
+        entities.push(makeMob("demon-mage", 5, 2));
+        entities.push(makeMob("demon-mage", 5, 4));
+        entities.push(makeMob("black-knight", 7, 3));
+        levelName = "pick your battles";
+    } else if (num == 5) {
+        entities.push(makeMob("orc-knight", 0, 2));
+        entities.push(makeMob("orc-knight", 4, 5));
+        entities.push(makeMob("orc-mage", 5, 0));
+        entities.push(makeMob("demon-spear", 11, 2));
+        entities.push(makeMob("demon-spear", 8, 6));
+        levelName = "play time for the baddies";
+    } else if (num == 6) {
+        entities.push(makeMob("black-knight", 0, 1));
+        entities.push(makeMob("black-knight", 6, 6));
+        entities.push(makeMob("demon-mage", 0, 4));
+        levelName = "sup";
+    } else if (num == 7) {
+        entities.push(makeMob("black-knight", 13, 6));
+        entities.push(makeMob("black-knight", 9, 4));
+        entities.push(makeMob("demon-mage", 5, 4));
+        entities.push(makeMob("skeleton", 2, 1));
+        entities.push(makeMob("skeleton", 0, 2));
+        entities.push(makeMob("ghoul", 9, 2));
+        levelName = "oh shi";
+    } else if (num == 8) {
         entities.push(makeMob("skeleton", 4, 2));
         entities.push(makeMob("ghoul", 2, 0));
         entities.push(makeMob("demon-spear", 6, 6));
@@ -497,7 +527,7 @@ var initLevel = function(num) {
         entities.push(makeMob("orc-knight", 7, 3));
         entities.push(makeMob("orc-mage", 11, 1));
         entities.push(makeMob("black-knight", 13, 4));
-        levelName = "i haven't made any more levels yet, so";
+        levelName = "i beat this once";
     }
 
     player.moves = getPlayerMoves();
