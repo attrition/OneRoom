@@ -1,29 +1,39 @@
 <html>
     
     <head>
-        <title>Hoplitelite custom maps</title>
+        <title>Hoplitelite map maker</title>
+        <link rel="stylesheet" type="text/css" href="style.css">
+        <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
     </head>
 
     <body>
 
-        <h1>Hoplitelite map maker (LD37 "one room")</h1>
+        <h1>Hoplitelite map maker</h1>
         
-        <div id="selected-brush">selected brush: player-knight</div>
+        <div>
+            <p id="selected-brush">
+                selected brush: player-knight
+            </p>
+        </div>
         <div id="brushes"></div>
 
         <canvas id="canvas" width="1016" height="512"></canvas>
         <div id="share">
-            copy and paste this to share your custom map <br />
-            <textarea id="shareBox" onfocus="this.select()" cols="50" rows="5">
-            </textarea>
-            <br />
+            <p>
+                copy and paste this to share your custom map <br />
+            </p>
+            <textarea id="shareBox" onfocus="this.select()" cols="50" rows="5"></textarea>
             <div id="testMap"></div>
+            <p>
+                not interested? <a href="index.html">take me back to the game</a>
+            </p>
         </div>
-        <p>
-            not interested?
-            <a href="index.html">take me back to the game</a>
-        </p>
         <script src="mapmaker.js"></script>
     </body>
 
+    <footer>
+            built using <a href="http://vanilla-js.com/">vanilla.js</a> and <a href="https://github.com/tweenjs/tween.js/">tween.js</a>
+            <br /><br />
+            Copyright © 2016 astudyinpixels            
+    </footer>
 </html>

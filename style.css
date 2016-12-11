@@ -1,0 +1,68 @@
+body {
+    background-color: rgb(14, 40, 39);
+}
+
+h1 {
+    color: #C1A347;
+    font-family: 'Press Start 2P';
+    font-weight: normal;
+    font-style: normal;
+    text-align: center;
+    font-size: 2em;
+}
+
+p {
+    color: #cecece;
+    font-family: 'Press Start 2P';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 12px;
+    line-height: 18px;
+}
+
+button {
+    background-color: #C1A347;
+    border: none;
+    color: white;
+    padding: 5px 10px;
+    text-align: center;
+    text-decoration: none;
+    font-family: 'Press Start 2P';
+    font-weight: normal;
+    font-style: normal;
+    display: inline-block;
+    font-size: 12px;
+    margin: 4px 2px;
+    cursor: pointer;
+}
+
+p#log {
+    background-color: darkslategrey;
+    color: white;
+    font-family: 'Press Start 2P';
+    font-style: normal;
+    font-weight: normal;
+    font-size: 12px;
+    line-height: 18px;
+    padding: 8px 12px;
+}
+
+p#mapMaker {
+    font-size: 11px;
+}
+
+footer {
+    color: white;
+    font-family: 'Press Start 2P';
+    font-weight: normal;
+    font-size: 0.5em;   
+    text-align: center; 
+}
+
+a {
+    color: #7163e7
+}
+
+div#share {
+    text-align: center;
+}

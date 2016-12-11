@@ -5,13 +5,24 @@ var ctx = canvas.getContext('2d');
 var log = document.getElementById('log');
 var details = document.getElementById('details');
 
+var logArr = [];
+
 var addLog = function(msg) {
-    var oldLog = log.innerHTML;
-    log.innerHTML = msg + "<br/>" + oldLog;
+    
+    if (logArr.length >= 4) {
+        logArr.pop();
+    }
+    logArr.unshift(msg);
+
+    log.innerHTML = "";
+    for (let logMsg of logArr) {        
+        log.innerHTML += logMsg + "<br/>";
+    }
 }
 
 var clearLog = function() {
     log.innerHTML = "";
+    logArr = [];
 }
 
 var setDetails = function(msg) {
@@ -518,7 +529,7 @@ var initLevel = function(num, customMap) {
         player = makeMob("player-knight", 2, 3);
         entities.push(makeMob("skeleton", 4, 2));
         entities.push(makeMob("ghoul", 2, 0));
-        levelName = "first blood -- try hovering over or tapping on an enemy to see their attack pattern";
+        levelName = "first blood -- hover over or tap enemies to see attack patterns";
     } else if (num == 2) {
         player = makeMob("player-knight", 2, 3);
         entities.push(makeMob("skeleton", 4, 2));
@@ -706,10 +717,10 @@ var attack = function(att, def) {
 
 var onDoneAttack = function(att, def) {
     def.hp -= 1;
-    addLog(att.type + " attacks " + def.type);
+    //addLog(att.type + " attacks " + def.type);
 
     if (def.hp <= 0) {
-        addLog(def.type + " dies!");
+        addLog(att.type + " killed " + def.type + "!");
         // melee attacks cause movement into the tile
         // attacks < 2 away are presumed to be ranged 
         if (distBetweenTiles(att, def) < 2) {

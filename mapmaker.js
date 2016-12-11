@@ -73,7 +73,7 @@ var Mob = function(type, x, y) {
     this.img.src = type + ".png";
     this.idleImg = new Image();
     this.idleImg.src = type + "2.png";
-    this.shortName = validBrushShortNames[validBrushTypes.indexOf(this.type)];
+    this.shortName = validMobShortNames[validBrushTypes.indexOf(this.type)];
 
     var realPos = realPosFromTilePos(x, y);
     this.realPos = { x: realPos.x, y: realPos.y };
@@ -91,7 +91,7 @@ var validBrushTypes = [
     "black-knight"
 ];
 
-var validBrushShortNames = [
+var validMobShortNames = [
     "pk",
     "s",
     "g",
