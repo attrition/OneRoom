@@ -565,6 +565,9 @@ var initLevel = function(num, customMap) {
         player = makeMob("player-knight", 2, 3);
         entities.push(makeMob("skeleton", 4, 2));
         entities.push(makeMob("ghoul", 2, 0));
+        addLog("when you attack you move into the enemy tile");
+        addLog("red squares means you're attacking!");
+        addLog("you can move to blue or red squares");
         levelName = "hover over or tap enemies to see attack patterns";
     } else if (num == 2) {
         player = makeMob("player-knight", 2, 3);
