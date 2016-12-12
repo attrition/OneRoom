@@ -54,8 +54,8 @@ var updateShareLink = function() {
         for (let gap of gaps) {
             link += gap.x + "," + gap.y + ",";
         }
+        link = link.slice(0, -1);
     }
-    link = link.slice(0, -1);
 
     
     var finalLink = baseLink + link;
