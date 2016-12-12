@@ -124,7 +124,7 @@ var validMobShortNames = [
     "bk"        
 ]
 
-var getMousePos = function() {
+var getMousePos = function(event) {
     var rect = canvas.getBoundingClientRect();
 
     return {
@@ -160,7 +160,7 @@ var removeEntityOrGapAt = function(x, y) {
 }
 
 canvas.addEventListener('mouseup', function(event) {
-    mousePos = getMousePos();
+    mousePos = getMousePos(event);
 
     // is this even possible?
     if (!inBounds(mousePos.x, mousePos.y)) { return; }

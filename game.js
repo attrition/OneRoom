@@ -658,7 +658,7 @@ var then = Date.now();
 
 //// game code
 
-var getMousePos = function() {
+var getMousePos = function(event) {
     var rect = canvas.getBoundingClientRect();
 
     return {
@@ -669,7 +669,7 @@ var getMousePos = function() {
 
 canvas.addEventListener('mousemove', function(event) { 
     // check if we're hovering over a mob, set his attack highlights
-    mousePos = getMousePos();
+    mousePos = getMousePos(event);
     highlighting = [];
     for (let ent of entities) {
         if (ent.x == mousePos.x && ent.y == mousePos.y) {
@@ -686,7 +686,7 @@ canvas.addEventListener('mouseup', function(event) {
     var moved = false;            
 
     if (gameState == GameStates.PLAYERMOVE) {
-        mousePos = getMousePos();
+        mousePos = getMousePos(event);
         for (let move of player.moves) {
             if (mousePos.x == move.x && mousePos.y == move.y) {
                 move.action();
