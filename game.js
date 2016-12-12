@@ -808,7 +808,7 @@ var tick = function() {
     }
 
     if (entities.length == 1 && gameState != GameStates.GAMEOVER) {
-        addLog("victory!");
+        addLog("victory! click to continue to next level");
         gameState = GameStates.VICTORY;
         playSound("victory.wav");
     }
