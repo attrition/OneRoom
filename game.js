@@ -1,9 +1,8 @@
 //// init globals
 
-var canvas = document.getElementById('canvas');
-var ctx = canvas.getContext('2d');
-var log = document.getElementById('log');
-var details = document.getElementById('details');
+var canvas = document.getElementById("canvas");
+var ctx = canvas.getContext("2d");
+var log = document.getElementById("log");
 
 var logArr = [];
 
@@ -18,12 +17,12 @@ var addLog = function(msg) {
     for (let logMsg of logArr) {        
         log.innerHTML += logMsg + "<br/>";
     }
-}
+};
 
 var clearLog = function() {
     log.innerHTML = "";
     logArr = [];
-}
+};
 
 var GameStates = { 
     PLAYERMOVE: 0,
@@ -37,7 +36,7 @@ var gameLevel = 1;
 var maxLevels = 8;
 var lastCustomMap = null;
 
-var tileScale = 8
+var tileScale = 8;
 var tileSize = tileScale * 9;
 var tileOffset = tileScale / 2;
 
@@ -47,7 +46,7 @@ var realPosFromTilePos = function(x, y) {
         y: (y * tileSize),
         s: (tileSize + (tileOffset * 2)),
     };
-}
+};
 
 var arenaSizeX = 14;
 var arenaSizeY = 7;
@@ -56,7 +55,7 @@ var inBounds = function(x, y) {
         x >= 0 && x < arenaSizeX &&
         y >= 0 && y < arenaSizeY
     );
-}
+};
 
 var mousePos = { x: 0, y: 0 };
 
@@ -69,8 +68,8 @@ gapImg.src = "gap.png";
 var Gap = function(x, y) {
     this.x = x;
     this.y = y;
-}
-gaps = [];
+};
+var gaps = [];
 
 // particles use real positions at all times
 var Particle = function(type, x, y) {
@@ -79,7 +78,7 @@ var Particle = function(type, x, y) {
     this.img.src = type + ".png";
     this.x = x;
     this.y = y;
-}
+};
 var particles = [];
 
 var destroyParticle = function(particle) {
@@ -87,7 +86,7 @@ var destroyParticle = function(particle) {
     if (idx != -1) {
         particles.splice(idx, 1);
     }
-}
+};
 
 var playSound = function(file, quiet) {
     var effect = new Audio(file);
@@ -98,18 +97,18 @@ var playSound = function(file, quiet) {
     }
     
     effect.play();
-}
+};
 
 var playRandomMoveSound = function() {
     var moveSounds = 3;
     
     // min <= num < max    
-    max = Math.floor(moveSounds);
+    var max = Math.floor(moveSounds);
     var num = Math.floor(Math.random() * ((max + 1) - 1)) + 1;
 
     // make moves quieter
     playSound("move" + num + ".wav", true);
-}
+};
 
 // Mobs use tile positions for x/y generally and realPos for drawing
 var Mob = function(type, hp, x, y) {
@@ -128,7 +127,7 @@ var Mob = function(type, hp, x, y) {
     this.attackTiles = [];
     this.AIMove = function() {};
     this.animateAttack = {};
-}
+};
 
 // all supported enemy types
 var validMobTypes = [
@@ -149,21 +148,21 @@ var validMobShortNames = [
     "ok",
     "om",
     "bk"        
-]
+];
 var distBetweenTiles = function(a, b) {
-    return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2))
-} 
+    return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
+};
 
 var bestMoveComparator = function(a, b) {
-    if (a.dist < b.dist) { return -1; }
-    if (a.dist > b.dist) { return 1; }
+    if (a.dist < b.dist) { return -1 }
+    if (a.dist > b.dist) { return 1 }
     return 0;    
-}
+};
 
 // for running away just sort the opposite way
 var fleeMoveComparator = function(a, b) {
     return -bestMoveComparator(a, b);
-}
+};
 
 // find closest attack tile and try and move it closer to player
 // with no regard for self preservation
@@ -238,11 +237,11 @@ var AIBasic = function(self, flees) {
     moves.sort(comparator);
     var preferredMove = moves.shift();
     move(self, preferredMove.x, preferredMove.y);
-}
+};
 
 var animMeleeAttack = function(self, target) {
     queueAnimation(tweenMeleeAttack(self, target));
-}
+};
 
 var tweenMeleeAttack = function(self, target) {    
     return new TWEEN.Tween(self.realPos)
@@ -254,11 +253,11 @@ var tweenMeleeAttack = function(self, target) {
             onDoneAttack(self, target);
             nextAnimation();
         });
-}
+};
 
 var animMageAttack = function(self, target, particleType) {
     queueAnimation(tweenMageAttack(self, target, particleType));
-}
+};
 
 var tweenMageAttack = function(self, target, particleType) {
     let particle = new Particle(particleType, self.realPos.x, self.realPos.y);
@@ -274,13 +273,13 @@ var tweenMageAttack = function(self, target, particleType) {
             onDoneAttack(self, target);
             nextAnimation();
         });
-}
+};
 
 var animatedMove = function(self, target) {
     queueAnimation(tweenEntToTile(self, target));
     self.x = target.x;
     self.y = target.y;
-}
+};
 
 var tweenEntToTile = function(self, target) {
     return new TWEEN.Tween(self.realPos)
@@ -295,7 +294,7 @@ var tweenEntToTile = function(self, target) {
                 tick();
             }            
         });
-}
+};
 
 var animationQueue = [];
 
@@ -318,7 +317,8 @@ var nextAnimation = function() {
             gameState = GameStates.PLAYERMOVE;
         }
     }
-}
+};
+
 var queueAnimation = function(anim) {
     animationQueue.push(anim);
     
@@ -326,7 +326,7 @@ var queueAnimation = function(anim) {
     if (gameState != GameStates.ANIMATING) {
         nextAnimation();
     }
-}
+};
 
 var getAttackTiles = function(mob) {
     var tiles = [];
@@ -423,7 +423,7 @@ var getAttackTiles = function(mob) {
     } 
 
     return tiles;
-}
+};
 
 var makeMob = function(type, x, y) {
     var hp = 1;
@@ -443,38 +443,38 @@ var makeMob = function(type, x, y) {
         hp = 1;
     } else if (type == "demon-mage") {
         mob.animateAttack = function(target) { animMageAttack(mob, target, "spark") };
-        mob.AIMove = function() { AIBasic(mob, true); };
+        mob.AIMove = function() { AIBasic(mob, true) };
         hp = 1;
     } else if (type == "skeleton") {
         mob.animateAttack = function(target) { animMeleeAttack(mob, target) };
-        mob.AIMove = function() { AIBasic(mob, false); };
+        mob.AIMove = function() { AIBasic(mob, false) };
         hp = 1;
     } else if (type == "ghoul") {
         mob.animateAttack = function(target) { animMeleeAttack(mob, target) };
-        mob.AIMove = function() { AIBasic(mob, false); };
+        mob.AIMove = function() { AIBasic(mob, false) };
         hp = 1;
     } else if (type == "black-knight") {
         mob.animateAttack = function(target) { animMeleeAttack(mob, target) };
-        mob.AIMove = function() { AIBasic(mob, false); };
+        mob.AIMove = function() { AIBasic(mob, false) };
         hp = 1;
     } else if (type == "orc-knight") {
         mob.animateAttack = function(target) { animMeleeAttack(mob, target) };
-        mob.AIMove = function() { AIBasic(mob, false); };
+        mob.AIMove = function() { AIBasic(mob, false) };
         hp = 1;
     } else if (type == "orc-mage") {
         mob.animateAttack = function(target) { animMageAttack(mob, target, "spark") };
-        mob.AIMove = function() { AIBasic(mob, true); };        
+        mob.AIMove = function() { AIBasic(mob, true) };        
         hp = 1;
     }
 
     mob.attackTiles = getAttackTiles(mob);
     mob.hp = hp;
     return mob;
-}
+};
 
 var getPlayerMoves = function() {
     var moves = [];
-    console.log(player);
+
     for (let y = player.y - 1; y <= player.y + 1; ++y) {
         for (let x = player.x - 1; x <= player.x + 1; ++x) {
             
@@ -508,7 +508,7 @@ var getPlayerMoves = function() {
         }
     }
     return moves;
-}
+};
 
 var entities = [];
 var player = {};
@@ -576,7 +576,7 @@ var initLevel = function(num, customMap) {
         entities.push(makeMob("ghoul", 0, 6));
         entities.push(makeMob("demon-spear", 6, 6));
         entities.push(makeMob("demon-mage", 9, 5));
-        levelName = "pick on someone your own size"
+        levelName = "pick on someone your own size";
     } else if (num == 3) {
         player = makeMob("player-knight", 2, 3);
         entities.push(makeMob("orc-knight", 7, 5));
@@ -643,18 +643,17 @@ var initLevel = function(num, customMap) {
     if (complete) {
         addLog("you already defeated every level! So here's Level 1 again");
     }
-}
+};
 
 var highlights = {
-    WARN: 'rgba(255,255,0,0.15)',
-    MOVE: 'rgba(0,148,255,0.18)',
-    ATTACK: 'rgba(200,30,30,0.30)',
+    WARN: "rgba(255,255,0,0.15)",
+    MOVE: "rgba(0,148,255,0.18)",
+    ATTACK: "rgba(200,30,30,0.30)",
 };
 var highlighting = []; // [ {x, y, colour}, ... ]
 
 var w = window;
 requestAnimationFrame = w.requestAnimationFrame || w.webkitRequestAnimationFrame || w.msRequestAnimationFrame || w.mozRequestAnimationFrame;
-var then = Date.now();
 
 //// game code
 
@@ -665,9 +664,9 @@ var getMousePos = function(event) {
         x: Math.floor((event.clientX - (rect.left + (tileScale / 2))) / tileSize),
         y: Math.floor((event.clientY - (rect.top + (tileScale / 2))) / tileSize)
     };
-}
+};
 
-canvas.addEventListener('mousemove', function(event) { 
+canvas.addEventListener("mousemove", function(event) { 
     // check if we're hovering over a mob, set his attack highlights
     mousePos = getMousePos(event);
     highlighting = [];
@@ -681,10 +680,7 @@ canvas.addEventListener('mousemove', function(event) {
     }
 }, false);
 
-canvas.addEventListener('mouseup', function(event) {     
-    // if playermove validate move then tick
-    var moved = false;            
-
+canvas.addEventListener("mouseup", function(event) {     
     if (gameState == GameStates.PLAYERMOVE) {
         mousePos = getMousePos(event);
         for (let move of player.moves) {
@@ -712,24 +708,24 @@ var drawHighlight = function(x, y, fillColour) {
                  
     var realPos = realPosFromTilePos(x, y);
     ctx.fillRect(realPos.x + tileOffset, realPos.y + tileOffset, realPos.s - (tileOffset * 2), realPos.s - (tileOffset * 2));
-} 
+};
 
 var highlightPlayerMoves = function() {   
     for (var move of player.moves) {
         drawHighlight(move.x, move.y, move.colour);
     }
-}
+};
 
 var highlightMobAttackTiles = function() {
     for (var tile of highlighting) {
         drawHighlight(tile.x, tile.y, tile.colour);
     }
-}
+};
 
 var drawHighlights = function() {
     highlightPlayerMoves();
     highlightMobAttackTiles();
-}
+};
 
 var drawEntities = function(time) {
     for (var ent of entities) {
@@ -739,20 +735,20 @@ var drawEntities = function(time) {
             ctx.drawImage(ent.idleImg, ent.realPos.x, ent.realPos.y);
         }
     }
-}
+};
 
 var drawParticles = function() {
     for (var particle of particles) {
         ctx.drawImage(particle.img, particle.x, particle.y);
     }
-}
+};
 
 var drawGaps = function() {
     for (var gap of gaps) {
-        let realPos = realPosFromTilePos(gap.x, gap.y)
+        let realPos = realPosFromTilePos(gap.x, gap.y);
         ctx.drawImage(gapImg, realPos.x, realPos.y);
     }
-}
+};
 
 var drawGame = function(time) {
     ctx.drawImage(backgroundImg, 0, 0);
@@ -765,17 +761,17 @@ var drawGame = function(time) {
     
     drawEntities(time);
     drawParticles();
-}
+};
 
 // game logic
 
 var move = function(ent, x, y) {   
     animatedMove(ent, { x: x, y: y });
-}
+};
 
 var attack = function(att, def) {
     att.animateAttack(def);
-}
+};
 
 var onDoneAttack = function(att, def) {
     def.hp -= 1;
@@ -797,7 +793,7 @@ var onDoneAttack = function(att, def) {
         gameState = GameStates.GAMEOVER;
         playSound("defeat.wav");                
     }     
-}
+};
 
 var tick = function() {
     console.log("tick");
@@ -814,16 +810,16 @@ var tick = function() {
     }
 
     player.moves = getPlayerMoves();
-}
+};
 
 var gameLoop = function(time) {
     TWEEN.update(time);
 	drawGame(time);
     requestAnimationFrame(gameLoop);
-}
+};
 
 var makeLevelSkipButtons = function() {
-    var skipList = document.getElementById('skipButtons');
+    var skipList = document.getElementById("skipButtons");
     
     for (let lvl = 1; lvl <= maxLevels; lvl++) {
         let btn = document.createElement("button");
@@ -832,7 +828,7 @@ var makeLevelSkipButtons = function() {
         btn.appendChild(text);
         skipList.appendChild(btn);
     }
-}
+};
 
 //// custom level parsing
 
@@ -842,15 +838,15 @@ var getCustomLayout = function(params) {
     try {
         var mobs = [];
         var customGaps = [];
-        var mobParam = params.get('m').split(',');
-        var playerParam = params.get('p').split(',');
-        var gapsParam = params.get('g');
+        var mobParam = params.get("m").split(",");
+        var playerParam = params.get("p").split(",");
+        var gapsParam = params.get("g");
 
         var px = Number.parseInt(playerParam.shift());
         var py = Number.parseInt(playerParam.shift());
 
         // check #1, we expect type-name,x,y, so sets of 3 inputs
-        if (mobParam.length % 3 != 0) { return false; }
+        if (mobParam.length % 3 != 0) { return false }
         let mobSets = mobParam.length / 3;
         
         for (let mob = 0; mob < mobSets; ++mob)  {
@@ -862,10 +858,10 @@ var getCustomLayout = function(params) {
 
         // gaps are optional
         if (gapsParam != null) {
-            gapSplit = gapsParam.split(',');
+            var gapSplit = gapsParam.split(",");
             
             // bail if gaps don't have x/y pairing
-            if (gapSplit.length % 2 != 0) { return false; }
+            if (gapSplit.length % 2 != 0) { return false }
             let gapSets = gapSplit.length / 2;
 
             for (let gap = 0; gap < gapSets; ++gap) {
@@ -879,14 +875,14 @@ var getCustomLayout = function(params) {
             player: { x: px, y: py },
             gaps: customGaps,
             mobs: mobs,
-        }
+        };
         console.log(layout);
         // store this so if player dies we can re-init to it 
         return layout;
     } catch (e) {
         return false;
     }
-}
+};
 
 //// game entry point
 
@@ -895,8 +891,8 @@ makeLevelSkipButtons();
 let mapParams = new URLSearchParams(location.search.slice(1));
 
 // if we have custom map params try and parse those
-if (mapParams.get('m') != null &&
-    mapParams.get('p') != null) {
+if (mapParams.get("m") != null &&
+    mapParams.get("p") != null) {
     let customMap = getCustomLayout(mapParams);
 
     // if customMap failed just go to level 1
