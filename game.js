@@ -888,20 +888,26 @@ var getCustomLayout = function(params) {
 
 makeLevelSkipButtons();
 
-let mapParams = new URLSearchParams(location.search.slice(1));
+// URLSearchParams isn't working on Safari, disable custom maps for now
+try {
+    let mapParams = new URLSearchParams(location.search.slice(1));
+    
+    // if we have custom map params try and parse those
+    if (mapParams.get("m") != null &&
+        mapParams.get("p") != null) {
+        let customMap = getCustomLayout(mapParams);
 
-// if we have custom map params try and parse those
-if (mapParams.get("m") != null &&
-    mapParams.get("p") != null) {
-    let customMap = getCustomLayout(mapParams);
-
-    // if customMap failed just go to level 1
-    if (customMap != false) {
-        initLevel(0, customMap);
+        // if customMap failed just go to level 1
+        if (customMap != false) {
+            initLevel(0, customMap);
+        } else {
+            initLevel(1);
+        }
     } else {
         initLevel(1);
     }
-} else {
+} catch (e) {
+    // forget it jake, it's chinatown
     initLevel(1);
 }
 
