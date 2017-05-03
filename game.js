@@ -814,7 +814,7 @@ var tick = function() {
 
 var gameLoop = function(time) {
     TWEEN.update(time);
-	drawGame(time);
+    drawGame(time);
     requestAnimationFrame(gameLoop);
 };
 
@@ -891,7 +891,7 @@ makeLevelSkipButtons();
 // URLSearchParams isn't working on Safari, disable custom maps for now
 try {
     let mapParams = new URLSearchParams(location.search.slice(1));
-    
+
     // if we have custom map params try and parse those
     if (mapParams.get("m") != null &&
         mapParams.get("p") != null) {
