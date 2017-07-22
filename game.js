@@ -167,9 +167,6 @@ var fleeMoveComparator = function(a, b) {
 // find closest attack tile and try and move it closer to player
 // with no regard for self preservation
 var AIBasic = function(self, flees) {
-    var closestDist = Number.MAX_VALUE;
-    var closestTile = {};
-
     // for each possible attack, check if it's possible to hit
     // if not then find the closest attack tile near the player
     // in the hopes that we can move the attack tiles closer
@@ -179,13 +176,6 @@ var AIBasic = function(self, flees) {
         if (tile.x == player.x && tile.y == player.y) {
             attack(self, player);
             return;
-        }
-
-        // not attacking (yet) keep finding the closest attack tile
-        let dist = distBetweenTiles(tile, player);
-        if (dist < closestDist) {
-            closestDist = dist;
-            closestTile = tile;
         }
     }
 
@@ -227,7 +217,7 @@ var AIBasic = function(self, flees) {
         }
     }
 
-    // if player is close and mob likes to flee, pick furthers away move
+    // if player is close and mob likes to flee, pick furthest away move
     var comparator = bestMoveComparator;
     if (flees && distBetweenTiles(self, player) < 2) {
         comparator = fleeMoveComparator;
@@ -534,7 +524,7 @@ var initLevel = function(num, customMap) {
     if (num == 0) {
         lastCustomMap = customMap;
 
-        // catch ANYTHING here and go to level 1 if something is messed update
+        // catch ANYTHING here and go to level 1 if something is messed up
         try {
             console.log(customMap);
             levelName =  "user made level";
@@ -641,7 +631,7 @@ var initLevel = function(num, customMap) {
     gameState = GameStates.PLAYERMOVE;
 
     if (complete) {
-        addLog("you already defeated every level! So here's Level 1 again");
+        addLog("you've already defeated every level! So here's Level 1 again");
     }
 };
 

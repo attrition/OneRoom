@@ -1,12 +1,12 @@
-var canvas = document.getElementById('canvas');
-var ctx = canvas.getContext('2d');
-var shareBox = document.getElementById('shareBox');
+var canvas = document.getElementById("canvas");
+var ctx = canvas.getContext("2d");
+var shareBox = document.getElementById("shareBox");
 
 var player = null;
 var entities = [];
 var mobBrush = "player-knight";
 
-var tileScale = 8
+var tileScale = 8;
 var tileSize = tileScale * 9;
 var tileOffset = tileScale / 2;
 
@@ -19,16 +19,16 @@ gapImg.src = "gap.png";
 var Gap = function(x, y) {
     this.x = x;
     this.y = y;
-}
-gaps = [];
+};
+var gaps = [];
 
 var updateShareLink = function() {
     var baseLink = "http://astudyinpixels.com/ld37/index.html";
 
-    if (player == null) { 
-        shareBox.innerHTML = "you must add a player to generate the share url"; 
-        return; 
-    };
+    if (player == null) {
+        shareBox.innerHTML = "you must add a player to generate the share url";
+        return;
+    }
 
     var link = "?p=" + player.x + "," + player.y;
     link += "&m=";
@@ -43,8 +43,8 @@ var updateShareLink = function() {
         // player is handled differently, for probably unnecessary reasons
         let ent = entities[i];
         if (ent.type != "player-knight") {
-            link += ent.shortName + "," + ent.x + "," + ent.y + ",";            
-        }        
+            link += ent.shortName + "," + ent.x + "," + ent.y + ",";
+        }
     }
     link = link.slice(0, -1);
 
@@ -57,14 +57,14 @@ var updateShareLink = function() {
         link = link.slice(0, -1);
     }
 
-    
+
     var finalLink = baseLink + link;
     shareBox.innerHTML = finalLink;
 
     var testMapDiv = document.getElementById("testMap");
-    testMapDiv.innerHTML = "test your map by clicking <a href=" + 
+    testMapDiv.innerHTML = "test your map by clicking <a href=" +
         finalLink + ">this</a>";
-}
+};
 updateShareLink();
 
 var realPosFromTilePos = function(x, y) {
@@ -73,7 +73,7 @@ var realPosFromTilePos = function(x, y) {
         y: (y * tileSize),
         s: (tileSize + (tileOffset * 2)),
     };
-}
+};
 
 var arenaSizeX = 14;
 var arenaSizeY = 7;
@@ -82,7 +82,7 @@ var inBounds = function(x, y) {
         x >= 0 && x < arenaSizeX &&
         y >= 0 && y < arenaSizeY
     );
-}
+};
 
 
 var Mob = function(type, x, y) {
@@ -97,7 +97,7 @@ var Mob = function(type, x, y) {
 
     var realPos = realPosFromTilePos(x, y);
     this.realPos = { x: realPos.x, y: realPos.y };
-}
+};
 
 // all support entity types
 var validBrushTypes = [
@@ -110,7 +110,7 @@ var validBrushTypes = [
     "orc-mage",
     "black-knight",
     "TILE-GAP",
-    "ERASE"    
+    "ERASE"
 ];
 
 var validMobShortNames = [
@@ -121,8 +121,8 @@ var validMobShortNames = [
     "dm",
     "ok",
     "om",
-    "bk"        
-]
+    "bk"
+];
 
 var getMousePos = function(event) {
     var rect = canvas.getBoundingClientRect();
@@ -131,11 +131,11 @@ var getMousePos = function(event) {
         x: Math.floor((event.clientX - (rect.left + (tileScale / 2))) / tileSize),
         y: Math.floor((event.clientY - (rect.top + (tileScale / 2))) / tileSize)
     };
-}
+};
 
 var removeEntityOrGapAt = function(x, y) {
     // if entity exists in this spot, replace it
-    var entIdx = -1;    
+    var entIdx = -1;
     for (var i = 0; i < entities.length; ++i) {
         if (entities[i].x == x && entities[i].y == y) {
             entIdx = i;
@@ -157,13 +157,13 @@ var removeEntityOrGapAt = function(x, y) {
     if (gapIdx != -1) {
         gaps.splice(gapIdx, 1);
     }
-}
+};
 
-canvas.addEventListener('mouseup', function(event) {
-    mousePos = getMousePos(event);
+canvas.addEventListener("mouseup", function(event) {
+    var mousePos = getMousePos(event);
 
     // is this even possible?
-    if (!inBounds(mousePos.x, mousePos.y)) { return; }
+    if (!inBounds(mousePos.x, mousePos.y)) { return }
 
     removeEntityOrGapAt(mousePos.x, mousePos.y);
 
@@ -179,7 +179,7 @@ canvas.addEventListener('mouseup', function(event) {
         return;
     }
 
-    // if brush is player-knight remove any old entity info so there's only one player
+    // if brush is player-knight remove any old entity info so there"s only one player
     if (mobBrush == "player-knight") {
         if (player != null) {
             removeEntityOrGapAt(player.x, player.y);
@@ -193,13 +193,13 @@ canvas.addEventListener('mouseup', function(event) {
 
 
 var generateBrushButtons = function() {
-    var brushList = document.getElementById('brushes');
+    var brushList = document.getElementById("brushes");
     var count = 0;
 
     for (let type of validBrushTypes) {
         let btn = document.createElement("button");
         let text = document.createTextNode(type);
-        
+
         btn.addEventListener("click", function() {
             var sel = document.getElementById("selected-brush");
             sel.innerHTML = "selected brush: " + type;
@@ -213,7 +213,7 @@ var generateBrushButtons = function() {
             brushList.appendChild(document.createElement("br"));
         }
     }
-}
+};
 
 
 var drawEntities = function(time) {
@@ -224,23 +224,23 @@ var drawEntities = function(time) {
             ctx.drawImage(ent.idleImg, ent.realPos.x, ent.realPos.y);
         }
     }
-}
+};
 
 var drawGaps = function() {
     for (var gap of gaps) {
-        let realPos = realPosFromTilePos(gap.x, gap.y)
+        let realPos = realPosFromTilePos(gap.x, gap.y);
         ctx.drawImage(gapImg, realPos.x, realPos.y);
     }
-}
+};
 
 var drawLoop = function(time) {
     ctx.drawImage(backgroundImg, 0, 0);
 
     drawGaps();
     drawEntities(time);
-    
+
     requestAnimationFrame(drawLoop);
-}
+};
 
 generateBrushButtons();
 requestAnimationFrame(drawLoop);
