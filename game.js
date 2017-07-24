@@ -1,5 +1,4 @@
-//// init globals
-
+// init globals
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
 var log = document.getElementById("log");
